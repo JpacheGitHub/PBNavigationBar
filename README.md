@@ -21,6 +21,11 @@ end
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     [self setNavBarBackgroundImage:nil shadowImage:nil];
+    /*
+     或者使用系统的设置方法
+     [self.navigationController.navigationBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
+     [self.navigationController.navigationBar setShadowImage:nil];
+     */
     self.navigationController.navigationBar.barTintColor = [UIColor redColor];
 }
 
