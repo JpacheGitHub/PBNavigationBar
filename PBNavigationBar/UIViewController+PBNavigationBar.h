@@ -14,6 +14,10 @@
  */
 @property (nonatomic, assign, readonly) BOOL hiddenNavBar;
 /**
+ 特殊处理的页面用的假 navBar
+ */
+@property (nonatomic, strong, readonly) UINavigationBar *fakeNavBar;
+/**
  返回当前页面是否需要不同风格的 NavBar 处理
  */
 - (BOOL)useDifferentNavigationBar;

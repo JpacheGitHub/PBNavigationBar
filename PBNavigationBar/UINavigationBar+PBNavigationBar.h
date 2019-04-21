@@ -10,5 +10,7 @@
 
 @interface UINavigationBar (PBNavigationBar)
 
+@property (nonatomic, assign) BOOL showFakeNavBar;
+
 @end
 

@@ -11,6 +11,7 @@
 #import <objc/message.h>
 #include <execinfo.h>
 #import "UINavigationController+PBNavigationBar.h"
+#import "UINavigationBar+PBNavigationBar.h"
 #import "PBNavigationBarMarco.h"
 
 
@@ -249,8 +250,15 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
     [array removeObject:@""];
     NSString *callerMethodName = [[array objectAtIndex:4] componentsSeparatedByString:@"_"].lastObject;
     
+    CGFloat navigationBarTop = 0;
+    if ([callerMethodName isEqualToString:@"viewWillAppear:"]) {
+        self.navigationController.navigationBar.showFakeNavBar = YES;
+    }else {
+        navigationBarTop = -PB_TopBarHeight;
+    }
     
-    self.fakeNavBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, self.appearanceBarTranslucent ? 0 : ([callerMethodName isEqualToString:@"viewWillAppear:"] ? 0 : -PB_TopBarHeight), UIScreen.mainScreen.bounds.size.width, PB_TopBarHeight)];
+    
+    self.fakeNavBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, self.appearanceBarTranslucent ? 0 : navigationBarTop, UIScreen.mainScreen.bounds.size.width, PB_TopBarHeight)];
     self.fakeNavBar.shadowImage = self.navBarShadowImage;
     [self.fakeNavBar setBackgroundImage:self.navBarBackgroundImage forBarMetrics:UIBarMetricsDefault];
     self.fakeNavBar.barTintColor = self.navBarTintColor;
@@ -261,6 +269,7 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
 }
 
 - (void)removeFakeNavBar {
+    self.navigationController.navigationBar.showFakeNavBar = NO;
     if (self.fakeNavBar) {
         [self.fakeNavBar removeFromSuperview];
         self.fakeNavBar = nil;
@@ -362,7 +371,7 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
 @implementation UIViewController (NavBarImage)
 
 - (void)setNavBarBackgroundImage:(UIImage *)backgroundImage shadowImage:(UIImage *)shadowImage {
-    if (self.parentViewController && ([self.parentViewController isKindOfClass:[UINavigationController class]] || [self.parentViewController isKindOfClass:[UITabBarController class]]) && !self.fakeNavBar) {
+    if (self.parentViewController && ([self.parentViewController isKindOfClass:[UINavigationController class]] || [self.parentViewController isKindOfClass:[UITabBarController class]])) {
         [self.navigationController.navigationBar setBackgroundImage:backgroundImage forBarMetrics:UIBarMetricsDefault];
         [self.navigationController.navigationBar setShadowImage:shadowImage];
     }

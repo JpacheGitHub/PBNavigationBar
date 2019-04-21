@@ -53,14 +53,22 @@ CGFloat const kDefaultColorLayerOpacity = 0.4f;
     [self pb_swizzleInstanceMethod:@selector(setBarTintColor:) with:@selector(pb_setBarTintColor:)];
     [self pb_swizzleInstanceMethod:@selector(layoutSubviews) with:@selector(pb_layoutSubviews)];
     [self pb_swizzleInstanceMethod:@selector(setBackgroundImage:forBarMetrics:) with:@selector(pb_setBackgroundImage:forBarMetrics:)];
+    [self pb_swizzleInstanceMethod:@selector(setShadowImage:) with:@selector(pb_setShadowImage:)];
 }
 
 - (void)pb_setBackgroundImage:(UIImage *)backgroundImage forBarMetrics:(UIBarMetrics)barMetrics {
+    if (self.showFakeNavBar) return;
+    
     if (backgroundImage) {
         [self.barTintColorLayer removeFromSuperlayer];
         self.barTintColorLayer = nil;
     }
     [self pb_setBackgroundImage:backgroundImage forBarMetrics:barMetrics];
+}
+
+- (void)pb_setShadowImage:(UIImage *)shadowImage {
+    if (self.showFakeNavBar) return;
+    [self pb_setShadowImage:shadowImage];
 }
 
 - (void)pb_setBarTintColor:(UIColor *)barTintColor {
@@ -152,6 +160,14 @@ CGFloat const kDefaultColorLayerOpacity = 0.4f;
 
 - (void)setBarTintColorLayer:(CALayer *)barTintColorLayer {
     objc_setAssociatedObject(self, @selector(barTintColorLayer), barTintColorLayer, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (BOOL)showFakeNavBar {
+    return [objc_getAssociatedObject(self, @selector(showFakeNavBar)) boolValue];
+}
+
+- (void)setShowFakeNavBar:(BOOL)showFakeNavBar {
+    objc_setAssociatedObject(self, @selector(showFakeNavBar), @(showFakeNavBar), OBJC_ASSOCIATION_ASSIGN);
 }
 
 @end
