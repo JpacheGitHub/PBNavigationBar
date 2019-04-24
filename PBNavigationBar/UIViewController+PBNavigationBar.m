@@ -154,10 +154,11 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
     [self removeFakeNavBar];
     if (self.navigationController.needAddFakeNavigationBar && self.parentViewController && ([self.parentViewController isKindOfClass:[UINavigationController class]] || [self.parentViewController isKindOfClass:[UITabBarController class]])) {
         [self setNavBarBackgroundImage:[UIImage new] shadowImage:[UIImage new]];
-        [self addFakeNavBar];
         if (self.navigationController.navigationBar.subviews.count) {
             self.navigationController.navigationBar.subviews[0].alpha = 0;
         }
+        
+        [self addFakeNavBar];
     }
     
     if ([NSStringFromClass([self pb_differentNavBar_fake_class]) hasPrefix:DifferentNavBarFakeSubClassPrefix]) {
@@ -180,10 +181,11 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
         [self removeFakeNavBar];
         if (self.navigationController.needAddFakeNavigationBar && self.parentViewController && ([self.parentViewController isKindOfClass:[UINavigationController class]] || [self.parentViewController isKindOfClass:[UITabBarController class]])) {
             [self setNavBarBackgroundImage:[UIImage new] shadowImage:[UIImage new]];
-            [self addFakeNavBar];
             if (self.navigationController.navigationBar.subviews.count) {
                 self.navigationController.navigationBar.subviews[0].alpha = 0;
             }
+            
+            [self addFakeNavBar];
         }
     }
 }
@@ -211,11 +213,8 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
     self.navigationController.navigationBar.userInteractionEnabled = NO;
     [self removeFakeNavBar];
     if (self.navigationController.needAddFakeNavigationBar && self.parentViewController && ([self.parentViewController isKindOfClass:[UINavigationController class]] || [self.parentViewController isKindOfClass:[UITabBarController class]])) {
-        [self setNavBarBackgroundImage:[UIImage new] shadowImage:[UIImage new]];
+        
         [self addFakeNavBar];
-        if (self.navigationController.navigationBar.subviews.count) {
-            self.navigationController.navigationBar.subviews[0].alpha = 0;
-        }
     }
 }
 
@@ -249,16 +248,43 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
     NSMutableArray *array = [NSMutableArray arrayWithArray:[sourceString  componentsSeparatedByCharactersInSet:separatorSet]];
     [array removeObject:@""];
     NSString *callerMethodName = [[array objectAtIndex:4] componentsSeparatedByString:@"_"].lastObject;
+    BOOL isViewWillAppear = [callerMethodName isEqualToString:@"viewWillAppear:"];
     
     CGFloat navigationBarTop = 0;
-    if ([callerMethodName isEqualToString:@"viewWillAppear:"]) {
+    if (isViewWillAppear) {
         self.navigationController.navigationBar.showFakeNavBar = YES;
     }else {
         navigationBarTop = -PB_TopBarHeight;
     }
     
+    if (self.appearanceBarTranslucent) {
+        navigationBarTop = 0;
+    }
     
-    self.fakeNavBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, self.appearanceBarTranslucent ? 0 : navigationBarTop, UIScreen.mainScreen.bounds.size.width, PB_TopBarHeight)];
+    if ([self.view isKindOfClass:[UIScrollView class]]) {
+        UIScrollView *scrollView = (UIScrollView *)self.view;
+        CGPoint currentOffset = scrollView.contentOffset;
+        [scrollView setContentOffset:currentOffset animated:NO];
+        self.view.layer.masksToBounds = NO;
+        navigationBarTop += currentOffset.y;
+        
+        if (@available(iOS 11.0, *)) {
+            if (scrollView.contentInsetAdjustmentBehavior != UIScrollViewContentInsetAdjustmentNever) {
+                if (isViewWillAppear && !scrollView.safeAreaInsets.top) {
+                    navigationBarTop -= PB_TopBarHeight;
+                }
+            }
+        }else {
+            if (self.automaticallyAdjustsScrollViewInsets == YES) {
+                if (isViewWillAppear) {
+                    navigationBarTop -= PB_TopBarHeight;
+                }
+            }
+        }
+    }
+    
+    
+    self.fakeNavBar = [[UINavigationBar alloc] initWithFrame:CGRectMake(0, navigationBarTop, UIScreen.mainScreen.bounds.size.width, PB_TopBarHeight)];
     self.fakeNavBar.shadowImage = self.navBarShadowImage;
     [self.fakeNavBar setBackgroundImage:self.navBarBackgroundImage forBarMetrics:UIBarMetricsDefault];
     self.fakeNavBar.barTintColor = self.navBarTintColor;
@@ -270,6 +296,11 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
 
 - (void)removeFakeNavBar {
     self.navigationController.navigationBar.showFakeNavBar = NO;
+    
+    if ([self.view isKindOfClass:[UIScrollView class]]) {
+        self.view.layer.masksToBounds = NO;
+    }
+    
     if (self.fakeNavBar) {
         [self.fakeNavBar removeFromSuperview];
         self.fakeNavBar = nil;
