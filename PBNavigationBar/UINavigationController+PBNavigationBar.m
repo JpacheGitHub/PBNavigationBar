@@ -55,6 +55,9 @@
         viewController.hidesBottomBarWhenPushed = YES;
     }
     
+    currentVC = [currentVC isKindOfClass:[UITabBarController class]] ? ((UITabBarController *)currentVC).selectedViewController : currentVC;
+    
+
     if ((![viewController useDifferentNavigationBar] && ![currentVC useDifferentNavigationBar]) || (viewController.hiddenNavBar || currentVC.hiddenNavBar)) {
         self.needAddFakeNavigationBar = NO;
     } else {
@@ -68,7 +71,11 @@
         return [self pb_differentNavBar_popViewControllerAnimated:animated];
     }
     UIViewController *previousVC = self.viewControllers[self.viewControllers.count - 2];
+    previousVC = [previousVC isKindOfClass:[UITabBarController class]] ? ((UITabBarController *)previousVC).selectedViewController : previousVC;
+    
     UIViewController *currentVC = self.viewControllers.lastObject;
+    currentVC = [currentVC isKindOfClass:[UITabBarController class]] ? ((UITabBarController *)currentVC).selectedViewController : currentVC;
+    
     if ((![currentVC useDifferentNavigationBar] && ![previousVC useDifferentNavigationBar]) || (previousVC.hiddenNavBar || currentVC.hiddenNavBar)) {
         self.needAddFakeNavigationBar = NO;
     } else {
@@ -80,7 +87,11 @@
 
 - (NSArray<UIViewController *> *)pb_differentNavBar_popToViewController:(UIViewController *)viewController animated:(BOOL)animated {
     UIViewController *previousVC = viewController;
+    previousVC = [previousVC isKindOfClass:[UITabBarController class]] ? ((UITabBarController *)previousVC).selectedViewController : previousVC;
+    
     UIViewController *currentVC = self.viewControllers.lastObject;
+    currentVC = [currentVC isKindOfClass:[UITabBarController class]] ? ((UITabBarController *)currentVC).selectedViewController : currentVC;
+    
     if ((![currentVC useDifferentNavigationBar] && ![previousVC useDifferentNavigationBar]) || (previousVC.hiddenNavBar || currentVC.hiddenNavBar)) {
         self.needAddFakeNavigationBar = NO;
     } else {
@@ -92,7 +103,11 @@
 
 - (NSArray<UIViewController *> *)pb_differentNavBar_popToRootViewControllerAnimated:(BOOL)animated {
     UIViewController *previousVC = self.viewControllers.firstObject;
+    previousVC = [previousVC isKindOfClass:[UITabBarController class]] ? ((UITabBarController *)previousVC).selectedViewController : previousVC;
+    
     UIViewController *currentVC = self.viewControllers.lastObject;
+    currentVC = [currentVC isKindOfClass:[UITabBarController class]] ? ((UITabBarController *)currentVC).selectedViewController : currentVC;
+    
     if ((![currentVC useDifferentNavigationBar] && ![previousVC useDifferentNavigationBar]) || (previousVC.hiddenNavBar || currentVC.hiddenNavBar)) {
         self.needAddFakeNavigationBar = NO;
     } else {

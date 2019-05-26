@@ -106,7 +106,7 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
     [self pb_differentNavBar_viewDidLoad];
     self.originalClass = NSStringFromClass([self class]);
     
-    if (![NSStringFromClass([self class]) hasPrefix:@"UI"] && ![self.originalClass hasPrefix:DifferentNavBarFakeSubClassPrefix]) {
+    if (![NSStringFromClass([self class]) hasPrefix:@"UI"] && ![NSStringFromClass([self class]) hasPrefix:@"AV"] && ![self.originalClass hasPrefix:DifferentNavBarFakeSubClassPrefix] && (!self.parentViewController || [self.parentViewController isKindOfClass:[UINavigationController class]] || [self.parentViewController isKindOfClass:[UITabBarController class]])) {
         
         NSString *fakeSubClassString = [NSString stringWithFormat:@"%@%@", DifferentNavBarFakeSubClassPrefix, self.originalClass];
         Class fakeSubClass = NSClassFromString(fakeSubClassString);
