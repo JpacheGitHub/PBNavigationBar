@@ -10,7 +10,7 @@
 #import "PBNavigationBarMarco.h"
 #import <objc/runtime.h>
 
-CGFloat const kDefaultColorLayerOpacity = 0.4f;
+CGFloat const kDefaultColorLayerOpacity = 0.78;
 
 @interface UINavigationBar (PBMethodSwizzle)
 
@@ -85,7 +85,7 @@ CGFloat const kDefaultColorLayerOpacity = 0.4f;
         if (isClearColor || alpha == 0 || !self.translucent) {
             calibratedColor = barTintColor;
         }else {
-            calibratedColor = [UIColor colorWithRed:red green:green blue:blue alpha:0.66];
+            calibratedColor = [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
         }
     }else {
         calibratedColor = nil;
@@ -151,7 +151,7 @@ CGFloat const kDefaultColorLayerOpacity = 0.4f;
 }
 
 - (CGFloat)convertValue:(CGFloat)value withOpacity:(CGFloat)opacity {
-    return value - (0.6 * value + 0.4) * (1 - opacity);
+    return 0.4 * (value - 1 + opacity) / opacity + 0.6 * value;
 }
 
 - (CALayer *)barTintColorLayer {
