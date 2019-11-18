@@ -8,7 +8,7 @@ PBNavigationBar 可以让你的 App 的 UINavigationBar 具有完美的转场动
 
 ```bash
 target 'TargetName' do
-	pod 'PBNavigationBar', '~> 3.0'
+	pod 'PBNavigationBar'
 end
 ```
 
