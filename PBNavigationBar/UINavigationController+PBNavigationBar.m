@@ -50,6 +50,12 @@
 }
 
 - (void)pb_differentNavBar_pushViewController:(UIViewController *)viewController animated:(BOOL)animated {
+    
+    if (!self.viewControllers.count) {
+        [self pb_differentNavBar_pushViewController:viewController animated:animated];
+        return;
+    }
+    
     UIViewController *currentVC = self.viewControllers.lastObject;
     if (self.viewControllers.count > 0) {
         viewController.hidesBottomBarWhenPushed = YES;

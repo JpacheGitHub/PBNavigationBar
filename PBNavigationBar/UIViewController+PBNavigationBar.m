@@ -106,7 +106,12 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
     [self pb_differentNavBar_viewDidLoad];
     self.originalClass = NSStringFromClass([self class]);
     
-    if (![NSStringFromClass([self class]) hasPrefix:@"UI"] && ![NSStringFromClass([self class]) hasPrefix:@"AV"] && ![self.originalClass hasPrefix:DifferentNavBarFakeSubClassPrefix] && (!self.parentViewController || [self.parentViewController isKindOfClass:[UINavigationController class]] || [self.parentViewController isKindOfClass:[UITabBarController class]])) {
+    if (![NSStringFromClass([self class]) hasPrefix:@"UI"] &&
+        ![NSStringFromClass([self class]) hasPrefix:@"AV"] &&
+        ![self.originalClass hasPrefix:DifferentNavBarFakeSubClassPrefix] &&
+        (!self.parentViewController || [self.parentViewController isKindOfClass:[UINavigationController class]] || [self.parentViewController isKindOfClass:[UITabBarController class]]) &&
+        ![self isKindOfClass:[UINavigationController class]] &&
+        ![self isKindOfClass:[UITabBarController class]]) {
         
         NSString *fakeSubClassString = [NSString stringWithFormat:@"%@%@", DifferentNavBarFakeSubClassPrefix, self.originalClass];
         Class fakeSubClass = NSClassFromString(fakeSubClassString);
@@ -127,14 +132,23 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
     if ([NSStringFromClass(fakeClass) isEqualToString:[NSString stringWithFormat:@"%@%@", DifferentNavBarFakeSubClassPrefix, self.originalClass]]) {
         return NSClassFromString(self.originalClass);
     }else {
-        return fakeClass;
+        if ([NSStringFromClass(fakeClass) containsString:DifferentNavBarFakeSubClassPrefix] && ![NSStringFromClass(fakeClass) hasPrefix:DifferentNavBarFakeSubClassPrefix]) {
+            return NSClassFromString([NSString stringWithFormat:@"%@%@", DifferentNavBarFakeSubClassPrefix, self.originalClass]);
+        }else {
+            return fakeClass;
+        }
     }
 }
 
 - (void)pb_differentNavBar_fake_viewWillAppear:(BOOL)animated {
+    Class fakeClass = [self pb_differentNavBar_fake_class];
+    if ([NSStringFromClass(fakeClass) containsString:DifferentNavBarFakeSubClassPrefix] && ![NSStringFromClass(fakeClass) hasPrefix:DifferentNavBarFakeSubClassPrefix]) {
+        fakeClass = NSClassFromString([NSString stringWithFormat:@"%@%@", DifferentNavBarFakeSubClassPrefix, self.originalClass]);
+    }
+    
     struct objc_super sup = {
         .receiver = self,
-        .super_class = class_getSuperclass([self pb_differentNavBar_fake_class])
+        .super_class = class_getSuperclass(fakeClass)
     };
     void(*func)(struct objc_super*,SEL) = (void*)&objc_msgSendSuper;
     func(&sup, _cmd); // 等同于[super viewWillAppear:]
@@ -161,9 +175,8 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
         [self addFakeNavBar];
     }
     
-    if ([NSStringFromClass([self pb_differentNavBar_fake_class]) hasPrefix:DifferentNavBarFakeSubClassPrefix]) {
-        Class fakeClass = [self pb_differentNavBar_fake_class];
-        Class originalClass = NSClassFromString([NSStringFromClass([self pb_differentNavBar_fake_class]) substringFromIndex:DifferentNavBarFakeSubClassPrefix.length]);
+    if ([NSStringFromClass(fakeClass) hasPrefix:DifferentNavBarFakeSubClassPrefix]) {
+        Class originalClass = NSClassFromString([NSStringFromClass(fakeClass) substringFromIndex:DifferentNavBarFakeSubClassPrefix.length]);
         object_setClass(self, originalClass);
         objc_disposeClassPair(fakeClass);
     }
