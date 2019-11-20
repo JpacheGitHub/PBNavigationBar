@@ -101,8 +101,11 @@ CGFloat const kDefaultColorLayerOpacity = 0.78;
     
     if (self.barTintColorLayer == nil) {
         self.barTintColorLayer = [CALayer layer];
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
         self.barTintColorLayer.opacity = kDefaultColorLayerOpacity;
         self.barTintColorLayer.frame = CGRectMake(0, 0 - PB_StatusBarHeight, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds) + PB_StatusBarHeight);
+        [CATransaction commit];
         [self.layer addSublayer:self.barTintColorLayer];
     }
     
@@ -114,7 +117,6 @@ CGFloat const kDefaultColorLayerOpacity = 0.78;
         opacity = [self minOpacityForValue:minVal];
     }
     
-    self.barTintColorLayer.opacity = opacity;
     
     red = [self convertValue:red withOpacity:opacity];
     green = [self convertValue:green withOpacity:opacity];
@@ -124,7 +126,13 @@ CGFloat const kDefaultColorLayerOpacity = 0.78;
     green = MAX(MIN(1.0, green), 0);
     blue = MAX(MIN(1.0, blue), 0);
     
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    
+    self.barTintColorLayer.opacity = opacity;
     self.barTintColorLayer.backgroundColor = [UIColor colorWithRed:red green:green blue:blue alpha:opacity].CGColor;
+    
+    [CATransaction commit];
 }
 
 - (void)pb_layoutSubviews {
