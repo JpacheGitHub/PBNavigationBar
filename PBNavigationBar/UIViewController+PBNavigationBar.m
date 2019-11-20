@@ -73,6 +73,10 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
  self.navigationController.navigationBar.alpha;
  */
 @property (nonatomic, assign) CGFloat navBarAlpha;
+/**
+ self.navigationController.isNavigationBarHidden;
+ */
+@property (nonatomic, assign) BOOL hiddenNavBar;
 
 @property (nonatomic, strong) UINavigationBar *fakeNavBar;
 @property (nonatomic, assign) BOOL isRecordNavBarAttribute;

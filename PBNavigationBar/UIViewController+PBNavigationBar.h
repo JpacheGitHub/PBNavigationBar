@@ -13,7 +13,7 @@
 /**
  self.navigationController.isNavigationBarHidden;
  */
-@property (nonatomic, assign) BOOL hiddenNavBar;
+@property (nonatomic, assign, readonly) BOOL hiddenNavBar;
 /**
  特殊处理的页面用的假 navBar
  */
