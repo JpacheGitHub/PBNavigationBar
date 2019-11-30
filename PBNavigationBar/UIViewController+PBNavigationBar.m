@@ -53,6 +53,7 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
 @property (nonatomic, strong) UINavigationBar *fakeNavBar;
 @property (nonatomic, assign) BOOL isRecordNavBarAttribute;
 @property (nonatomic, copy) NSString *originalClass;
+@property (nonatomic, copy) NSString *kvoClass;
 
 @end
 
@@ -64,6 +65,24 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
     [self pb_swizzleInstanceMethod:@selector(pb_differentNavBar_viewWillDisappear:) with:@selector(viewWillDisappear:)];
     [self pb_swizzleInstanceMethod:@selector(pb_differentNavBar_viewDidDisappear:) with:@selector(viewDidDisappear:)];
     [self pb_swizzleInstanceMethod:@selector(pb_differentNavBar_viewDidLoad) with:@selector(viewDidLoad)];
+    [self pb_swizzleInstanceMethod:@selector(pb_differentNavBar_addObserver:forKeyPath:options:context:) with:@selector(addObserver:forKeyPath:options:context:)];
+}
+
+- (void)pb_differentNavBar_addObserver:(NSObject *)observer forKeyPath:(NSString *)keyPath options:(NSKeyValueObservingOptions)options context:(nullable void *)context {
+    
+    Class currentClass = object_getClass(self);
+    if ([NSStringFromClass(currentClass) containsString:@"PB_DifferentNavBar_"] && [NSStringFromClass(currentClass) hasPrefix:@"PB_DifferentNavBar_"]) {
+        Class superClass = class_getSuperclass(currentClass);
+        
+        object_setClass(self, superClass);
+        
+        [self pb_differentNavBar_addObserver:observer forKeyPath:keyPath options:options context:context];
+        self.kvoClass = NSStringFromClass(object_getClass(self));
+        
+        object_setClass(self, currentClass);
+    }else {
+        [self pb_differentNavBar_addObserver:observer forKeyPath:keyPath options:options context:context];
+    }
 }
 
 - (BOOL)useDifferentNavigationBar {
@@ -145,7 +164,11 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
     
     if ([NSStringFromClass(fakeClass) hasPrefix:DifferentNavBarFakeSubClassPrefix]) {
         Class originalClass = NSClassFromString([NSStringFromClass(fakeClass) substringFromIndex:DifferentNavBarFakeSubClassPrefix.length]);
-        object_setClass(self, originalClass);
+        if (self.kvoClass.length) {
+            object_setClass(self, NSClassFromString(self.kvoClass));
+        }else {
+            object_setClass(self, originalClass);
+        }
         objc_disposeClassPair(fakeClass);
     }
 }
@@ -316,6 +339,14 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
     objc_setAssociatedObject(self, @selector(originalClass), originalClass, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
+- (NSString *)kvoClass {
+    return objc_getAssociatedObject(self, @selector(kvoClass));
+}
+
+- (void)setKvoClass:(NSString *)kvoClass {
+    objc_setAssociatedObject(self, @selector(kvoClass), kvoClass, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+
 - (BOOL)appearanceBarTranslucent {
     return [objc_getAssociatedObject(self, @selector(appearanceBarTranslucent)) boolValue];
 }
@@ -374,8 +405,6 @@ NSString *const DifferentNavBarFakeSubClassPrefix = @"PB_DifferentNavBar_";
 - (void)setNavBarAlpha:(CGFloat)navBarAlpha {
     objc_setAssociatedObject(self, @selector(navBarAlpha), [NSNumber numberWithFloat:navBarAlpha], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
-
-
 
 @end
 
